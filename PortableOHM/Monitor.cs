@@ -194,7 +194,7 @@ namespace OHMWrapper
         {
         }
 
-        protected void UpdateHardware()
+        protected virtual void UpdateHardware()
         {
             _hardware.Update();
 
