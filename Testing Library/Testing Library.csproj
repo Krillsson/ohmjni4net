@@ -53,9 +53,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PortableOHM\PortableOHM.csproj">
+    <ProjectReference Include="..\PortableOHM\OHMWrapper.csproj">
       <Project>{219a2126-828f-44e4-a0db-af9e440b5985}</Project>
-      <Name>PortableOHM</Name>
+      <Name>OHMWrapper</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

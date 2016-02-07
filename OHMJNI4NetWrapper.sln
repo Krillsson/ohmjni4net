@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortableOHM", "PortableOHM\PortableOHM.csproj", "{219A2126-828F-44E4-A0DB-AF9E440B5985}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OHMWrapper", "PortableOHM\OHMWrapper.csproj", "{219A2126-828F-44E4-A0DB-AF9E440B5985}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing Library", "Testing Library\Testing Library.csproj", "{B9C36F5D-2F13-4C31-904F-0372D9ABE8A6}"
 EndProject

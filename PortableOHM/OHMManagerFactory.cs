@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenHardwareMonitor.Hardware;
 
-namespace PortableOHM
+namespace OHMWrapper
 {
     public class OHMManagerFactory
     {

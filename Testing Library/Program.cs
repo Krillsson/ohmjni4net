@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using PortableOHM;
+using OHMWrapper;
 
 namespace Testing_Library
 {
@@ -23,6 +23,9 @@ namespace Testing_Library
             Console.WriteLine("1: CPU");
             Console.WriteLine("2: GPU");
             Console.WriteLine("3: RAM");
+            Console.WriteLine("4: Network");
+            Console.WriteLine("5: Drives");
+            Console.WriteLine("6: Mainboard");
             Console.WriteLine("Q: Quit");
             Console.WriteLine("");
             Console.WriteLine("=================END=====OF====SYSTEM=================");
@@ -42,6 +45,26 @@ namespace Testing_Library
                                 Console.WriteLine(cpu.Name);
                                 cpu.CoreClocks.ToList().ForEach(o => Console.WriteLine(o.Text()));
                                 cpu.CoreLoads.ToList().ForEach(o => Console.WriteLine(o.Text()));
+                                if (cpu.PackageTemperature != null)
+                                {
+                                    Console.WriteLine(cpu.PackageTemperature.Text());
+                                }
+                                if (cpu.Temperatures != null && cpu.Temperatures.Length > 0)
+                                {
+                                    cpu.Temperatures.ToList().ForEach(o => Console.WriteLine(o.Text()));
+                                }
+                                if (cpu.FanRPM != null)
+                                {
+                                    Console.WriteLine(cpu.FanRPM.Text());
+                                }
+                                if (cpu.FanPercent != null)
+                                {
+                                    Console.WriteLine(cpu.FanPercent.Text());
+                                }
+                                if (cpu.Voltage != null)
+                                {
+                                    Console.WriteLine(cpu.Voltage.Text());
+                                }
 
                             }
                             Thread.Sleep(2000);
@@ -63,11 +86,14 @@ namespace Testing_Library
                                 if (gpu.CoreClock != null)
                                 {
                                     Console.WriteLine(gpu.CoreClock.Text());
-
                                 }
-                                if (gpu.Fan != null)
+                                if (gpu.FanRPM != null)
                                 {
-                                    Console.WriteLine(gpu.Fan.Text());
+                                    Console.WriteLine(gpu.FanRPM.Text());
+                                }
+                                if (gpu.FanPercent != null)
+                                {
+                                    Console.WriteLine(gpu.FanPercent.Text());
                                 }
                                 if (gpu.MemoryClock != null)
                                 {
@@ -77,7 +103,6 @@ namespace Testing_Library
                                 if (gpu.MemoryLoad != null)
                                 {
                                     Console.WriteLine(gpu.MemoryLoad.Text());
-
                                 }
 
                                 if (gpu.Temperature != null)
@@ -87,7 +112,6 @@ namespace Testing_Library
                                 if (gpu.Voltage != null)
                                 {
                                     Console.WriteLine(gpu.Voltage.Text());
-                               
                                 }
 
                             }
@@ -95,12 +119,87 @@ namespace Testing_Library
                         } while (key != ConsoleKey.Q);
                         break;
                     case ConsoleKey.D3:
+                        do
+                        {
+                            Console.Clear();
+                            monitorManager.Update();
+                            RamMonitor ram = monitorManager.RamMonitor;
+                            if (monitorManager.RamMonitor.Voltage != null)
+                            {
+                                Console.WriteLine(ram.Voltage.Text());
+                            }
+                            if (monitorManager.RamMonitor.Load != null)
+                            {
+                                Console.WriteLine(ram.Load.Text());
+                            }
+                            if (monitorManager.RamMonitor.Available != null)
+                            {
+                                Console.WriteLine(ram.Available.Text());
+                            }
+                            if (monitorManager.RamMonitor.Used != null)
+                            {
+                                Console.WriteLine(ram.Used.Text());
+                            }
+                            if (monitorManager.RamMonitor.Clock != null)
+                            {
+                                Console.WriteLine(ram.Clock.Text());
+                            }
+                            Thread.Sleep(2000);
+                        } while (key != ConsoleKey.Q);
                         break;
+                    case ConsoleKey.D4:
+                        do
+                        {
+                            Console.Clear();
+                            monitorManager.Update();
+                            NetworkMonitor network = monitorManager.NetworkMonitor;
+                            foreach (NicInfo nic in network.Nics)
+                            {
+                                Console.WriteLine(nic.Name);
+                                Console.WriteLine(nic.InBandwidth.Text());
+                                Console.WriteLine(nic.OutBandwidth.Text());
+                               
+                            }
+                         
+                            Thread.Sleep(2000);
+                        } while (key != ConsoleKey.Q);
+                        break;
+                    case ConsoleKey.D5:
+                        do
+                        {
+                            Console.Clear();
+                            monitorManager.Update();
+                            DriveMonitor driveMonitor = monitorManager.DriveMonitor;
+                            foreach (DriveInfo drive in driveMonitor.Drives)
+                            {
+
+                            }
+
+                            Thread.Sleep(2000);
+                        } while (key != ConsoleKey.Q);
+                        break;
+
+                    case ConsoleKey.D6:
+                        do
+                        {
+                            Console.Clear();
+                            monitorManager.Update();
+                            MainboardMonitor mainboardMonitor = monitorManager.MainboardMonitor;
+                            Console.WriteLine(mainboardMonitor.Name);
+                            mainboardMonitor.BoardFanPercent.ToList().ForEach(s => Console.WriteLine(s.Text()));
+                            mainboardMonitor.BoardFanRPM.ToList().ForEach(s => Console.WriteLine(s.Text()));
+                            mainboardMonitor.BoardTemperatures.ToList().ForEach(s => Console.WriteLine(s.Text()));
+                            mainboardMonitor.HddTemperatures.ToList().ForEach(s => Console.WriteLine(s.Text()));
+
+                            Thread.Sleep(2000);
+                        } while (key != ConsoleKey.Q);
+                        break;
+
+
                     case ConsoleKey.Q:
                         System.Environment.Exit(0);
                         break;
                     default:
-                        Console.WriteLine("1: Testgames();\n2:TestVideos();\n3: PrintTitleOfGame();\nQ: Quit");
                         break;
                 }
 

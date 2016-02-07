@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenHardwareMonitor.Hardware;
 
-namespace PortableOHM
+namespace OHMWrapper
 {
     public class GpuMonitor : OHMMonitor
     {
@@ -12,9 +12,10 @@ namespace PortableOHM
         public OHMSensor MemoryLoad { get; private set ; }
         public OHMSensor Voltage { get; private set ; }
         public OHMSensor Temperature { get; private set ; }
-        public OHMSensor Fan { get; private set ; }
+        public OHMSensor FanPercent { get; private set ; }
+        public OHMSensor FanRPM { get; private set ; }
 
-        public GpuMonitor(IHardware hardware, IHardware board, ConfigParam[] parameters) : base(MonitorType.GPU, hardware, board, parameters)
+        public GpuMonitor(IHardware hardware) : base(hardware)
         {
             InitGPU();
         }
@@ -75,9 +76,18 @@ namespace PortableOHM
 
             if (_fanSensor != null)
             {
-                Fan = new OHMSensor(_fanSensor, DataType.Percent, "Fan");
-                _sensorList.Add(Fan);
+                FanPercent = new OHMSensor(_fanSensor, DataType.Percent, "Fan");
+                _sensorList.Add(FanPercent);
             }
+
+            ISensor _fanRpmSensor = _hardware.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Fan && s.Index == 0);
+
+            if (_fanRpmSensor != null)
+            {
+                FanRPM = new OHMSensor(_fanRpmSensor, DataType.RPM, "Fan");
+                _sensorList.Add(FanRPM);
+            }
+
 
             Sensors = _sensorList.ToArray();
         }

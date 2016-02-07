@@ -7,7 +7,7 @@ using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using OpenHardwareMonitor.Hardware;
 
-namespace PortableOHM
+namespace OHMWrapper
 {
     public class MonitorManager : IDisposable
     {
@@ -21,6 +21,8 @@ namespace PortableOHM
             _cpuMonitors = new List<CpuMonitor>();
 
             UpdateBoard();
+            SetupMainboardMonitor();
+
 
             foreach (MonitorConfig _config in MonitorConfig.Default)
             {
@@ -33,27 +35,23 @@ namespace PortableOHM
             switch (config.Type)
             {
                 case MonitorType.CPU:
-                    SetupCpuMonitors(config.Params);
+                    SetupCpuMonitors();
                     return;
-                
+
                 case MonitorType.RAM:
-                    OHMPanel(
-                        config.Type,
-                        config.Params,
-                        HardwareType.RAM
-                        );
+                    SetupRamMonitor();
                     return;
 
                 case MonitorType.GPU:
-                       SetupGpuMonitors(config.Params);
+                    SetupGpuMonitors();
                     return;
 
                 case MonitorType.HD:
-                    DrivePanel(config.Type, config.Params);
+                    SetupDriveMonitor(config.Params);
                     return;
 
                 case MonitorType.Network:
-                    NetworkPanel(config.Type, config.Params);
+                    SetupNetworkMonitor(config.Params);
                     return;
             }
         }
@@ -65,7 +63,9 @@ namespace PortableOHM
             OHMMonitorsList.ForEach(i => i.Update());
             _cpuMonitors.ForEach(i => i.Update());
             _gpuMonitors.ForEach(i => i.Update());
-            
+
+            MainboardMonitor.Update();
+            RamMonitor.Update();
             NetworkMonitor.Update();
             DriveMonitor.Update();
         }
@@ -76,6 +76,8 @@ namespace PortableOHM
             _cpuMonitors.ForEach(i => i.Dispose());
             _gpuMonitors.ForEach(i => i.Dispose());
 
+            MainboardMonitor.Dispose();
+            RamMonitor.Dispose();
             NetworkMonitor.Dispose();
             DriveMonitor.Dispose();
         }
@@ -85,22 +87,12 @@ namespace PortableOHM
             return _computer.Hardware.Where(h => types.Contains(h.HardwareType));
         }
 
-        private void OHMPanel(MonitorType type, ConfigParam[] parameters, params HardwareType[] hardwareTypes)
-        {
-          
-            foreach (IHardware _hardware in GetHardware(hardwareTypes))
-            {
-                OHMMonitorsList.Add(new OHMMonitor(type, _hardware, _board, parameters));
-            }
-
-        }
-
-        private void DrivePanel(MonitorType type, ConfigParam[] parameters)
+        private void SetupDriveMonitor(ConfigParam[] parameters)
         {
             DriveMonitor = new DriveMonitor(parameters);
         }
 
-        private void NetworkPanel(MonitorType type, ConfigParam[] parameters)
+        private void SetupNetworkMonitor(ConfigParam[] parameters)
         {
             NetworkMonitor = new NetworkMonitor(parameters);
         }
@@ -121,28 +113,28 @@ namespace PortableOHM
             return OHMMonitorsList.ToArray();
         }
 
-        private void SetupGpuMonitors(ConfigParam[] parameters)
+        private void SetupGpuMonitors()
         {
-            HardwareType[] hardwareTypes = {HardwareType.GpuNvidia, HardwareType.GpuAti};
+            HardwareType[] hardwareTypes = { HardwareType.GpuNvidia, HardwareType.GpuAti };
             foreach (IHardware _hardware in GetHardware(hardwareTypes))
             {
-                _gpuMonitors.Add(new GpuMonitor(_hardware, _board, parameters));
+                _gpuMonitors.Add(new GpuMonitor(_hardware));
             }
         }
 
-        private List<GpuMonitor> _gpuMonitors; 
+        private List<GpuMonitor> _gpuMonitors;
 
         public GpuMonitor[] GpuMonitors()
         {
             return _gpuMonitors.ToArray();
         }
 
-        private void SetupCpuMonitors(ConfigParam[] parameters)
+        private void SetupCpuMonitors()
         {
             HardwareType[] hardwareTypes = { HardwareType.CPU };
             foreach (IHardware _hardware in GetHardware(hardwareTypes))
             {
-                _cpuMonitors.Add(new CpuMonitor(_hardware, _board, parameters));
+                _cpuMonitors.Add(new CpuMonitor(_hardware, _board));
             }
         }
 
@@ -153,40 +145,39 @@ namespace PortableOHM
             return _cpuMonitors.ToArray();
         }
 
+        private void SetupRamMonitor()
+        {
+            HardwareType[] hardwareTypes = { HardwareType.RAM };
+            RamMonitor = new RamMonitor(GetHardware(hardwareTypes[0]).FirstOrDefault(), _board);
+        }
+
+        private void SetupMainboardMonitor()
+        {
+            MainboardMonitor = new MainboardMonitor(_computer, _board);
+        }
+
+
+        public MainboardMonitor MainboardMonitor { get; private set; }
+        public RamMonitor RamMonitor { get; private set; }
         public DriveMonitor DriveMonitor { get; private set; }
         public NetworkMonitor NetworkMonitor { get; private set; }
 
         private IComputer _computer { get; set; }
 
         private IHardware _board { get; set; }
-
-        private IHardware findIOChipWithTemp()
-        {
-            return null;
-        }
     }
 
     public class OHMMonitor
     {
-        public OHMMonitor(MonitorType type, IHardware hardware, IHardware board, ConfigParam[] parameters)
+        public OHMMonitor(IHardware hardware)
         {
             Name = hardware.Name;
 
-            ShowName = parameters.GetValue<bool>(ParamKey.HardwareNames);
+            ShowName = true;
 
             _hardware = hardware;
 
             UpdateHardware();
-
-            switch (type)
-            {
-
-                case MonitorType.RAM:
-                    InitRAM(
-                        board
-                        );
-                    break;
-            }
         }
 
         public void Update()
@@ -213,61 +204,6 @@ namespace PortableOHM
             }
         }
 
-        
-
-        public void InitRAM(IHardware board)
-        {
-            List<OHMSensor> _sensorList = new List<OHMSensor>();
-
-            ISensor _ramClock = _hardware.Sensors.Where(s => s.SensorType == SensorType.Clock).FirstOrDefault();
-
-            if (_ramClock != null)
-            {
-                _sensorList.Add(new OHMSensor(_ramClock, DataType.Clock, "Clock", true));
-            }
-
-            ISensor _voltage = null;
-
-            if (board != null)
-            {
-                _voltage = board.Sensors.Where(s => s.SensorType == SensorType.Voltage && s.Name.Contains("RAM")).FirstOrDefault();
-            }
-
-            if (_voltage == null)
-            {
-                _voltage = _hardware.Sensors.Where(s => s.SensorType == SensorType.Voltage).FirstOrDefault();
-            }
-
-            if (_voltage != null)
-            {
-                _sensorList.Add(new OHMSensor(_voltage, DataType.Voltage, "Voltage"));
-            }
-
-            ISensor _loadSensor = _hardware.Sensors.Where(s => s.SensorType == SensorType.Load && s.Index == 0).FirstOrDefault();
-
-            if (_loadSensor != null)
-            {
-                _sensorList.Add(new OHMSensor(_loadSensor, DataType.Percent, "Load"));
-            }
-
-            ISensor _usedSensor = _hardware.Sensors.Where(s => s.SensorType == SensorType.Data && s.Index == 0).FirstOrDefault();
-
-            if (_usedSensor != null)
-            {
-                _sensorList.Add(new OHMSensor(_usedSensor, DataType.Gigabyte, "Used"));
-            }
-
-            ISensor _availSensor = _hardware.Sensors.Where(s => s.SensorType == SensorType.Data && s.Index == 1).FirstOrDefault();
-
-            if (_availSensor != null)
-            {
-                _sensorList.Add(new OHMSensor(_availSensor, DataType.Gigabyte, "Free"));
-            }
-
-            Sensors = _sensorList.ToArray();
-        }
-
-
         public string Name { get; protected set; }
 
         public bool ShowName { get; protected set; }
@@ -282,7 +218,7 @@ namespace PortableOHM
         internal const string CATEGORYNAME = "LogicalDisk";
 
         public DriveMonitor(ConfigParam[] parameters)
-        {            
+        {
             bool _showDetails = parameters.GetValue<bool>(ParamKey.DriveDetails);
             int _usedSpaceAlert = parameters.GetValue<int>(ParamKey.UsedSpaceAlert);
 
@@ -310,8 +246,8 @@ namespace PortableOHM
         public DriveInfo[] Drives { get; private set; }
     }
 
-    public class DriveInfo : IDisposable, INotifyPropertyChanged
-    {
+    public class DriveInfo : IDisposable
+    { 
         private const string FREEMB = "Free Megabytes";
         private const string PERCENTFREE = "% Free Space";
         private const string BYTESREADPERSECOND = "Disk Read Bytes/sec";
@@ -370,18 +306,6 @@ namespace PortableOHM
 
                 WriteRate = string.Format("Write: {0:#,##0.##} {1}", _writeRate, _writeFormat);
             }
-
-            if (UsedSpaceAlert > 0 && UsedSpaceAlert <= _usedPercent)
-            {
-                if (!IsAlert)
-                {
-                    IsAlert = true;
-                }
-            }
-            else if (IsAlert)
-            {
-                IsAlert = false;
-            }
         }
 
         public void Dispose()
@@ -407,18 +331,6 @@ namespace PortableOHM
             }
         }
 
-        public void NotifyPropertyChanged(string propertyName)
-        {
-            PropertyChangedEventHandler _handler = PropertyChanged;
-
-            if (_handler != null)
-            {
-                _handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public string Instance { get; private set; }
 
         public string Label { get; private set; }
@@ -435,10 +347,9 @@ namespace PortableOHM
             {
                 _value = value;
 
-                NotifyPropertyChanged("Value");
             }
         }
-        
+
         private string _load { get; set; }
 
         public string Load
@@ -450,8 +361,6 @@ namespace PortableOHM
             set
             {
                 _load = value;
-
-                NotifyPropertyChanged("Load");
             }
         }
 
@@ -466,8 +375,6 @@ namespace PortableOHM
             set
             {
                 _usedGB = value;
-
-                NotifyPropertyChanged("UsedGB");
             }
         }
 
@@ -482,8 +389,6 @@ namespace PortableOHM
             set
             {
                 _freeGB = value;
-
-                NotifyPropertyChanged("FreeGB");
             }
         }
 
@@ -498,8 +403,6 @@ namespace PortableOHM
             set
             {
                 _readRate = value;
-
-                NotifyPropertyChanged("ReadRate");
             }
         }
 
@@ -514,8 +417,6 @@ namespace PortableOHM
             set
             {
                 _writeRate = value;
-
-                NotifyPropertyChanged("WriteRate");
             }
         }
 
@@ -530,8 +431,6 @@ namespace PortableOHM
             set
             {
                 _isAlert = value;
-
-                NotifyPropertyChanged("IsAlert");
             }
         }
 
@@ -555,9 +454,6 @@ namespace PortableOHM
         public NetworkMonitor(ConfigParam[] parameters)
         {
             bool _showName = parameters.GetValue<bool>(ParamKey.HardwareNames);
-            bool _useBytes = parameters.GetValue<bool>(ParamKey.UseBytes);
-            int _bandwidthInAlert = parameters.GetValue<int>(ParamKey.BandwidthInAlert);
-            int _bandwidthOutAlert = parameters.GetValue<int>(ParamKey.BandwidthOutAlert);
 
             string[] _instances = new PerformanceCounterCategory(CATEGORYNAME).GetInstanceNames();
 
@@ -568,7 +464,7 @@ namespace PortableOHM
 
             Regex _regex = new Regex("[^A-Za-z]");
 
-            Nics = _instances.Join(_nics, i => _regex.Replace(i, ""), n => _regex.Replace(n.Description, ""), (i, n) => new NicInfo(i, n.Description, _showName, _useBytes, _bandwidthInAlert, _bandwidthOutAlert), StringComparer.Ordinal).ToArray();
+            Nics = _instances.Join(_nics, i => _regex.Replace(i, ""), n => _regex.Replace(n.Description, ""), (i, n) => new NicInfo(i, n.Description, _showName), StringComparer.Ordinal).ToArray();
         }
 
         public void Update()
@@ -586,7 +482,7 @@ namespace PortableOHM
                 _nic.Dispose();
             }
         }
-        
+
         public NicInfo[] Nics { get; private set; }
     }
 
@@ -595,7 +491,7 @@ namespace PortableOHM
         private const string BYTESRECEIVEDPERSECOND = "Bytes Received/sec";
         private const string BYTESSENTPERSECOND = "Bytes Sent/sec";
 
-        public NicInfo(string instance, string name, bool showName = true, bool useBytes = false, double bandwidthInAlert = 0, double bandwidthOutAlert = 0)
+        public NicInfo(string instance, string name, bool showName = true)
         {
             Instance = instance;
             Name = name;
@@ -603,16 +499,12 @@ namespace PortableOHM
 
             InBandwidth = new Bandwidth(
                 new PerformanceCounter(NetworkMonitor.CATEGORYNAME, BYTESRECEIVEDPERSECOND, instance),
-                "In",
-                useBytes,
-                bandwidthInAlert
+                "In"
                 );
 
             OutBandwidth = new Bandwidth(
                 new PerformanceCounter(NetworkMonitor.CATEGORYNAME, BYTESSENTPERSECOND, instance),
-                "Out",
-                useBytes,
-                bandwidthOutAlert
+                "Out"
                 );
         }
 
@@ -638,51 +530,24 @@ namespace PortableOHM
         public string Name { get; private set; }
 
         public bool ShowName { get; private set; }
-        
+
         public Bandwidth InBandwidth { get; private set; }
 
         public Bandwidth OutBandwidth { get; private set; }
     }
 
-    public class Bandwidth : IDisposable, INotifyPropertyChanged
+    public class Bandwidth : IDisposable
     {
-        public Bandwidth(PerformanceCounter counter, string label, bool useBytes = false, double alertValue = 0)
+        public Bandwidth(PerformanceCounter counter, string label)
         {
             _counter = counter;
 
             Label = label;
-            UseBytes = useBytes;
-            AlertValue = alertValue;
         }
 
         public void Update()
         {
-            double _value = _counter.NextValue() / (UseBytes ? 1024d : 128d);
-
-            if (AlertValue > 0 && AlertValue <= _value)
-            {
-                if (!IsAlert)
-                {
-                    IsAlert = true;
-                }
-            }
-            else if (IsAlert)
-            {
-                IsAlert = false;
-            }
-
-            string _format;
-
-            if (UseBytes)
-            {
-                Data.MinifyKiloBytesPerSecond(ref _value, out _format);
-            }
-            else
-            {
-                Data.MinifyKiloBitsPerSecond(ref _value, out _format);
-            }
-
-            Text = string.Format("{0}: {1:#,##0.##} {2}", Label, _value, _format);
+            Value = _counter.NextValue() / 128d;
         }
 
         public void Dispose()
@@ -706,42 +571,15 @@ namespace PortableOHM
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string Label { get; private set; }
+        public double Value { get; private set; }
 
-        private string _text { get; set; }
-
-        public string Text
+        public string Text()
         {
-            get
-            {
-                return _text;
-            }
-            set
-            {
-                _text = value;
-
-                NotifyPropertyChanged("Text");
-            }
+            string _format;
+            double value = Value;
+            Data.MinifyKiloBitsPerSecond(ref value, out _format);
+            return string.Format("{0}: {1:#,##0.##} {2}", Label, value, _format);
         }
-
-        private bool _isAlert { get; set; }
-
-        public bool IsAlert
-        {
-            get
-            {
-                return _isAlert;
-            }
-            set
-            {
-                _isAlert = value;
-
-                NotifyPropertyChanged("IsAlert");
-            }
-        }
-
-        public bool UseBytes { get; set; }
-
-        public double AlertValue { get; private set; }
 
         private PerformanceCounter _counter { get; set; }
     }
@@ -753,9 +591,10 @@ namespace PortableOHM
         RAM,
         GPU,
         HD,
-        Network
+        Network,
+        MainBoard
     }
-    
+
     [Serializable]
     public class MonitorConfig
     {

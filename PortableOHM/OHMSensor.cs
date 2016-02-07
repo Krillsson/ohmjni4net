@@ -2,11 +2,11 @@ using System;
 using System.ComponentModel;
 using OpenHardwareMonitor.Hardware;
 
-namespace PortableOHM
+namespace OHMWrapper
 {
     public class OHMSensor
     {
-        public OHMSensor(ISensor sensor, DataType dataType, string label, bool round = false, double alertValue = 0)
+        public OHMSensor(ISensor sensor, DataType dataType, string label, bool round = false)
         {
             _sensor = sensor;
 
@@ -36,7 +36,7 @@ namespace PortableOHM
             }
             else
             {
-                Value = 0;
+                Value = -1;
             }
         }
 
@@ -44,19 +44,14 @@ namespace PortableOHM
 
         public string Text()
         {
-            if (Value == 0)
-            {
-                return string.Format("{0}: No Value", Label);
-            }
-            else
-            {
+
                 return string.Format(
         "{0}: {1:#,##0.##}{2}",
         Label,
         Value,
         Append
         );
-            }
+            
 
         }
 
