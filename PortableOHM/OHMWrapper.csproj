@@ -53,6 +53,7 @@
     <Compile Include="GpuMonitor.cs" />
     <Compile Include="MainBoardMonitor.cs" />
     <Compile Include="Monitor.cs" />
+    <Compile Include="NetworkMonitor.cs" />
     <Compile Include="OHMManagerFactory.cs" />
     <Compile Include="OHMSensor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

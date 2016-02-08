@@ -9,14 +9,11 @@ namespace OHMWrapper
     {
         internal const string CATEGORYNAME = "LogicalDisk";
 
-        public DriveInfoMonitor(ConfigParam[] parameters)
+        public DriveInfoMonitor()
         {
-            bool _showDetails = parameters.GetValue<bool>(ParamKey.DriveDetails);
-            int _usedSpaceAlert = parameters.GetValue<int>(ParamKey.UsedSpaceAlert);
-
             Regex _regex = new Regex("^[A-Z]:$");
 
-            Drives = new PerformanceCounterCategory(CATEGORYNAME).GetInstanceNames().Where(n => _regex.IsMatch(n)).OrderBy(d => d[0]).Select(n => new DriveInfo(n, _showDetails, _usedSpaceAlert)).ToArray();
+            Drives = new PerformanceCounterCategory(CATEGORYNAME).GetInstanceNames().Where(n => _regex.IsMatch(n)).OrderBy(d => d[0]).Select(n => new DriveInfo(n, true)).ToArray();
         }
 
         public void Update()
@@ -45,11 +42,10 @@ namespace OHMWrapper
         private const string BYTESREADPERSECOND = "Disk Read Bytes/sec";
         private const string BYTESWRITEPERSECOND = "Disk Write Bytes/sec";
 
-        public DriveInfo(string name, bool showDetails = false, double usedSpaceAlert = 0)
+        public DriveInfo(string name, bool showDetails = false)
         {
             Label = Instance = name;
             ShowDetails = showDetails;
-            UsedSpaceAlert = usedSpaceAlert;
 
             _counterFreeMB = new PerformanceCounter(DriveInfoMonitor.CATEGORYNAME, FREEMB, name);
             _counterFreePercent = new PerformanceCounter(DriveInfoMonitor.CATEGORYNAME, PERCENTFREE, name);
@@ -212,23 +208,7 @@ namespace OHMWrapper
             }
         }
 
-        private bool _isAlert { get; set; }
-
-        public bool IsAlert
-        {
-            get
-            {
-                return _isAlert;
-            }
-            set
-            {
-                _isAlert = value;
-            }
-        }
-
         public bool ShowDetails { get; private set; }
-
-        public double UsedSpaceAlert { get; private set; }
 
         private PerformanceCounter _counterFreeMB { get; set; }
 

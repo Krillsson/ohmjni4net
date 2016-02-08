@@ -22,11 +22,6 @@ namespace OHMWrapper
             {
                 double _value = _sensor.Value.Value;
 
-                if (_converter != null)
-                {
-                    _converter.Convert(ref _value);
-                }
-
                 if (Round)
                 {
                     _value = Math.Round(_value);
@@ -66,7 +61,5 @@ namespace OHMWrapper
         public bool Round { get; set; }
 
         private ISensor _sensor { get; set; }
-
-        private CelciusToFahrenheit _converter { get; set; }
     }
 }
