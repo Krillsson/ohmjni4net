@@ -43,8 +43,8 @@ namespace OHMWrapper
 
             if (sensor != null)
             {
-                Temperature = new OHMSensor(sensor, DataType.Percent, "Remaining life");
-                sensors.Add(Temperature);
+                RemainingLife = new OHMSensor(sensor, DataType.Percent, "Remaining life");
+                sensors.Add(RemainingLife);
             }
         }
 
