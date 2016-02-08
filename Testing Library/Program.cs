@@ -26,6 +26,7 @@ namespace Testing_Library
             Console.WriteLine("4: Network");
             Console.WriteLine("5: Drives");
             Console.WriteLine("6: Mainboard");
+            Console.WriteLine("7: Network");
             Console.WriteLine("Q: Quit");
             Console.WriteLine("");
             Console.WriteLine("=================END=====OF====SYSTEM=================");
@@ -169,10 +170,24 @@ namespace Testing_Library
                         {
                             Console.Clear();
                             monitorManager.Update();
-                            DriveMonitor driveMonitor = monitorManager.DriveMonitor;
-                            foreach (DriveInfo drive in driveMonitor.Drives)
+                            foreach (DriveMonitor drive in monitorManager.DriveMonitors())
                             {
-
+                                if (drive.LogicalName != null)
+                                {
+                                    Console.WriteLine(drive.LogicalName);
+                                }
+                                if (drive.Temperature != null)
+                                {
+                                    Console.WriteLine(drive.Temperature.Text());
+                                }
+                                if (drive.RemainingLife != null)
+                                {
+                                    Console.WriteLine(drive.RemainingLife.Text());
+                                }
+                                if (drive.LifecycleData != null)
+                                {
+                                    drive.LifecycleData.ToList().ForEach(s => Console.WriteLine(s.Text()));    
+                                }
                             }
 
                             Thread.Sleep(2000);
@@ -190,6 +205,35 @@ namespace Testing_Library
                             mainboardMonitor.BoardFanRPM.ToList().ForEach(s => Console.WriteLine(s.Text()));
                             mainboardMonitor.BoardTemperatures.ToList().ForEach(s => Console.WriteLine(s.Text()));
                             mainboardMonitor.HddTemperatures.ToList().ForEach(s => Console.WriteLine(s.Text()));
+
+                            Thread.Sleep(2000);
+                        } while (key != ConsoleKey.Q);
+                        break;
+
+                    case ConsoleKey.D7:
+                        do
+                        {
+                            Console.Clear();
+                            monitorManager.Update();
+                            foreach (NicInfo nic in monitorManager.NetworkMonitor.Nics)
+                            {
+                                if (nic.Name != null)
+                                {
+                                    Console.WriteLine(nic.Name);
+                                }
+                                if (nic.InBandwidth != null)
+                                {
+                                    Console.WriteLine(nic.InBandwidth.Text());
+                                }
+                                if (nic.OutBandwidth != null)
+                                {
+                                    Console.WriteLine(nic.OutBandwidth.Text());
+                                }
+                                if (nic.Instance != null)
+                                {
+                                    Console.WriteLine(nic.Instance);
+                                }
+                            }
 
                             Thread.Sleep(2000);
                         } while (key != ConsoleKey.Q);

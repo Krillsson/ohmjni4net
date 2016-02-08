@@ -48,12 +48,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CpuMonitor.cs" />
+    <Compile Include="DriveInfoMonitor.cs" />
+    <Compile Include="DriveMonitor.cs" />
     <Compile Include="GpuMonitor.cs" />
     <Compile Include="MainBoardMonitor.cs" />
     <Compile Include="Monitor.cs" />
     <Compile Include="OHMManagerFactory.cs" />
     <Compile Include="OHMSensor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyHelper.cs" />
     <Compile Include="RamMonitor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

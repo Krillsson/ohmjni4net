@@ -13,9 +13,8 @@ namespace OHMWrapper
         public OHMSensor[] BoardFanRPM { get; private set; }
         public OHMSensor[] BoardFanPercent { get; private set; }
         public OHMSensor[] HddTemperatures { get; private set; }
-        private List<IHardware> hddsWithTemperatures = new List<IHardware>(); 
 
-        public MainboardMonitor(IComputer computer, IHardware board) : base(board)
+        public MainboardMonitor(IHardware board) : base(board)
         {
             List<OHMSensor> _sensorList = new List<OHMSensor>();
             BoardTemperatures = new OHMSensor[0];
@@ -27,16 +26,9 @@ namespace OHMWrapper
                 initBoardTemperatures(board, _sensorList);
                 initBoardFanRpm(board, _sensorList);
                 initBoardFanPercent(board, _sensorList);
-                initHddTemperatures(computer, _sensorList);
             }
             Sensors = _sensorList.ToArray();
 
-        }
-
-        protected override void UpdateHardware()
-        {
-            base.UpdateHardware();
-            hddsWithTemperatures.ForEach(h => h.Update());
         }
 
         private void initBoardTemperatures(IHardware board, List<OHMSensor> _sensorList)
@@ -68,22 +60,5 @@ namespace OHMWrapper
                 _sensorList.AddRange(BoardFanPercent);
             }
         }
-
-        private void initHddTemperatures(IComputer computer, List<OHMSensor> _sensorList)
-        {
-            List<IHardware> hddsWithTemperatures =
-                computer.Hardware.Where(h => h.HardwareType == HardwareType.HDD)
-                    .Where(d => d.Sensors.Any(a => a.SensorType == SensorType.Temperature))
-                    .ToList();
-
-            if (hddsWithTemperatures.Count > 0)
-            {
-                this.hddsWithTemperatures = hddsWithTemperatures;
-
-                HddTemperatures = hddsWithTemperatures.Select(h => new OHMSensor(h.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Temperature), DataType.Celcius, h.Name)).ToArray();
-                _sensorList.AddRange(HddTemperatures);
-            }
-        }
-
     }
 }
