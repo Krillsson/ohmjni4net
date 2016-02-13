@@ -56,6 +56,7 @@
     <Compile Include="NetworkMonitor.cs" />
     <Compile Include="OHMManagerFactory.cs" />
     <Compile Include="OHMSensor.cs" />
+    <Compile Include="OptionalOhmSensor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyHelper.cs" />
     <Compile Include="RamMonitor.cs" />
