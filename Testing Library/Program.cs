@@ -112,6 +112,7 @@ namespace Testing_Library
                                 {
                                     Console.WriteLine(gpu.Voltage.Text());
                                 }
+                                Console.WriteLine(gpu.Vendor);
 
                             }
                             Thread.Sleep(2000);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenHardwareMonitor.Hardware;
@@ -6,6 +7,7 @@ namespace OHMWrapper
 {
     public class GpuMonitor : OHMMonitor
     {
+        public string Vendor { get; private set; }
         public OHMSensor CoreClock { get; private set ; }
         public OHMSensor MemoryClock { get; private set ; }
         public OHMSensor CoreLoad { get; private set ; }
@@ -22,6 +24,19 @@ namespace OHMWrapper
 
         public void InitGPU()
         {
+            if (_hardware.HardwareType == HardwareType.GpuNvidia)
+            {
+                Vendor = "NVIDIA";
+            }
+            else if (_hardware.HardwareType == HardwareType.GpuAti)
+            {
+                Vendor = "AMD";
+            }
+            else
+            {
+                Vendor = "Unkown";
+            }
+
             List<OHMSensor> _sensorList = new List<OHMSensor>();
 
             ISensor _coreClock = _hardware.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Clock && s.Index == 0);
