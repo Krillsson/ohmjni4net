@@ -23,9 +23,9 @@ namespace OHMWrapper
 
             Regex _regex = new Regex("[^A-Za-z]");
 
-            Nics = _instances.Join(_nics, i => _regex.Replace(i, ""), n => _regex.Replace(n.Description, ""), (i, n) => new NicInfo(i, n.Description), StringComparer.Ordinal).ToArray();
+            Nics = _instances.Join(_nics, i => _regex.Replace(i, ""), n => _regex.Replace(n.Description, ""), (i, n) => new NicInfo(i, n.Description, string.Join(":", n.GetPhysicalAddress().GetAddressBytes().Select(b => b.ToString("X2")))), StringComparer.Ordinal).ToArray();
         }
-
+            
         public void Update()
         {
             foreach (NicInfo _nic in Nics)
@@ -50,10 +50,11 @@ namespace OHMWrapper
         private const string BYTESRECEIVEDPERSECOND = "Bytes Received/sec";
         private const string BYTESSENTPERSECOND = "Bytes Sent/sec";
 
-        public NicInfo(string instance, string name)
+        public NicInfo(string instance, string name, string physicalAddress)
         {
             Instance = instance;
             Name = name;
+            PhysicalAddress = physicalAddress;
             InBandwidth = new Bandwidth(
                 new PerformanceCounter(NetworkMonitor.CATEGORYNAME, BYTESRECEIVEDPERSECOND, instance),
                 "In"
@@ -85,8 +86,7 @@ namespace OHMWrapper
         public string Instance { get; private set; }
 
         public string Name { get; private set; }
-
-        public bool ShowName { get; private set; }
+        public string PhysicalAddress { get; private set; }
 
         public Bandwidth InBandwidth { get; private set; }
 

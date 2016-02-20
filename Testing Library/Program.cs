@@ -82,7 +82,6 @@ namespace Testing_Library
                                 if (gpu.CoreLoad != null)
                                 {
                                     Console.WriteLine(gpu.CoreLoad.Text());
-
                                 }
                                 if (gpu.CoreClock != null)
                                 {
@@ -99,7 +98,6 @@ namespace Testing_Library
                                 if (gpu.MemoryClock != null)
                                 {
                                     Console.WriteLine(gpu.MemoryClock.Text());
-
                                 }
                                 if (gpu.MemoryLoad != null)
                                 {
@@ -159,6 +157,7 @@ namespace Testing_Library
                                 Console.WriteLine(nic.Name);
                                 Console.WriteLine(nic.InBandwidth.Text());
                                 Console.WriteLine(nic.OutBandwidth.Text());
+                                Console.WriteLine(nic.PhysicalAddress);
                                
                             }
                          
@@ -188,6 +187,22 @@ namespace Testing_Library
                                 {
                                     drive.LifecycleData.ToList().ForEach(s => Console.WriteLine(s.Text()));    
                                 }
+                                double _readRate = drive.ReadRate;
+
+                                string _readFormat;
+                                Data.MinifyKiloBytesPerSecond(ref _readRate, out _readFormat);
+
+                                String ReadRate = string.Format("Read: {0:#,##0.##} {1}", _readRate, _readFormat);
+
+                                double _writeRate = drive.WriteRate;
+
+                                string _writeFormat;
+                                Data.MinifyKiloBytesPerSecond(ref _writeRate, out _writeFormat);
+                                String WriteRate = string.Format("Write: {0:#,##0.##} {1}", _writeRate, _writeFormat);
+
+
+                                Console.WriteLine(ReadRate);
+                                Console.WriteLine(WriteRate);
                             }
 
                             Thread.Sleep(2000);
@@ -229,9 +244,9 @@ namespace Testing_Library
                                 {
                                     Console.WriteLine(nic.OutBandwidth.Text());
                                 }
-                                if (nic.Instance != null)
+                                if (nic.PhysicalAddress != null)
                                 {
-                                    Console.WriteLine(nic.Instance);
+                                    Console.WriteLine(nic.PhysicalAddress);
                                 }
                             }
 

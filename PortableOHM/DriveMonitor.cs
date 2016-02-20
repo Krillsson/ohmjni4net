@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using OpenHardwareMonitor.Hardware;
 
@@ -9,10 +11,20 @@ namespace OHMWrapper
 {
     public class DriveMonitor : OHMMonitor
     {
+        private System.IO.DriveInfo _info;
+        private PerformanceCounter _counterReadRate { get; set; }
+        private PerformanceCounter _counterWriteRate { get; set; }
+        private const string BYTESREADPERSECOND = "Disk Read Bytes/sec";
+        private const string BYTESWRITEPERSECOND = "Disk Write Bytes/sec";
+        internal const string CATEGORYNAME = "LogicalDisk";
+
+
         public string LogicalName { get; private set; }
         public OHMSensor Temperature { get; private set; }
         public OHMSensor RemainingLife { get; private set; }
         public OHMSensor[] LifecycleData { get; private set; }
+        public double ReadRate { get; private set; }
+        public double WriteRate { get; private set; }
 
         public DriveMonitor(IHardware hardware) : base(hardware)
         {
@@ -21,7 +33,9 @@ namespace OHMWrapper
             InitTemperature(sensorList);
             InitRemainingLife(sensorList);
             InitLifecycleData(sensorList);
+            readDriveInfo();
             InitName();
+            initReadWriteRate();
 
             Sensors = sensorList.ToArray();
         }
@@ -58,11 +72,39 @@ namespace OHMWrapper
             }
         }
 
+        protected override void UpdateHardware()
+        {
+            base.UpdateHardware();
+            if (_counterReadRate != null && _counterWriteRate != null)
+            {
+                ReadRate = _counterReadRate.NextValue() / 1024d;
+                WriteRate = _counterWriteRate.NextValue() / 1024d;
+            }
+        }
+
         void InitName()
         {
-            System.IO.DriveInfo[] info = PropertyHelper.GetPrivateFieldValue<System.IO.DriveInfo[]>(_hardware,
-                "driveInfos");
-                LogicalName = info.FirstOrDefault()?.RootDirectory.Name;
+            LogicalName = _info?.RootDirectory.Name;
         }
+
+        void initReadWriteRate()
+        {
+            String name = _info.Name.Replace("\\", "");
+            Regex _regex = new Regex("^["+ name + "]:$");
+            List<String> names= new PerformanceCounterCategory(CATEGORYNAME).GetInstanceNames()
+                .Where(n => _regex.IsMatch(n))
+                .OrderBy(d => d[0])
+                .ToList();
+            _counterReadRate = new PerformanceCounter(DriveInfoMonitor.CATEGORYNAME, BYTESREADPERSECOND, name);
+            _counterWriteRate = new PerformanceCounter(DriveInfoMonitor.CATEGORYNAME, BYTESWRITEPERSECOND, name);
+        }
+
+        private void readDriveInfo()
+        {
+            _info = PropertyHelper.GetPrivateFieldValue<System.IO.DriveInfo[]>(_hardware,
+                "driveInfos").FirstOrDefault();
+        }
+
+
     }
 }
