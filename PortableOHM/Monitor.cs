@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using OpenHardwareMonitor.Hardware;
 
@@ -26,7 +24,6 @@ namespace OHMWrapper
             SetupRamMonitor();
             SetupGpuMonitors();
             SetupNetworkMonitor();
-            SetupDriveMonitor();
         }
 
         public void Update()
@@ -42,7 +39,6 @@ namespace OHMWrapper
             MainboardMonitor.Update();
             RamMonitor.Update();
             NetworkMonitor.Update();
-            DriveInfoMonitor.Update();
         }
 
         public void Dispose()
@@ -55,17 +51,11 @@ namespace OHMWrapper
             MainboardMonitor.Dispose();
             RamMonitor.Dispose();
             NetworkMonitor.Dispose();
-            DriveInfoMonitor.Dispose();
         }
 
         private IEnumerable<IHardware> GetHardware(params HardwareType[] types)
         {
             return _computer.Hardware.Where(h => types.Contains(h.HardwareType));
-        }
-
-        private void SetupDriveMonitor()
-        {
-            DriveInfoMonitor = new DriveInfoMonitor();
         }
 
         private void SetupNetworkMonitor()
@@ -151,7 +141,6 @@ namespace OHMWrapper
 
         public MainboardMonitor MainboardMonitor { get; private set; }
         public RamMonitor RamMonitor { get; private set; }
-        public DriveInfoMonitor DriveInfoMonitor { get; private set; }
         public NetworkMonitor NetworkMonitor { get; private set; }
 
         private IComputer _computer { get; set; }
@@ -184,6 +173,7 @@ namespace OHMWrapper
 
         public void Dispose()
         {
+
         }
 
         protected virtual void UpdateHardware()

@@ -77,14 +77,14 @@ namespace OHMWrapper
             base.UpdateHardware();
             if (_counterReadRate != null && _counterWriteRate != null)
             {
-                ReadRate = _counterReadRate.NextValue() / 1024d;
-                WriteRate = _counterWriteRate.NextValue() / 1024d;
+                ReadRate = _counterReadRate.NextValue();
+                WriteRate = _counterWriteRate.NextValue();
             }
         }
 
         void InitName()
         {
-            LogicalName = _info?.RootDirectory.Name;
+            LogicalName = _info.RootDirectory.Name;
         }
 
         void initReadWriteRate()
@@ -95,8 +95,8 @@ namespace OHMWrapper
                 .Where(n => _regex.IsMatch(n))
                 .OrderBy(d => d[0])
                 .ToList();
-            _counterReadRate = new PerformanceCounter(DriveInfoMonitor.CATEGORYNAME, BYTESREADPERSECOND, name);
-            _counterWriteRate = new PerformanceCounter(DriveInfoMonitor.CATEGORYNAME, BYTESWRITEPERSECOND, name);
+            _counterReadRate = new PerformanceCounter(CATEGORYNAME, BYTESREADPERSECOND, name);
+            _counterWriteRate = new PerformanceCounter(CATEGORYNAME, BYTESWRITEPERSECOND, name);
         }
 
         private void readDriveInfo()

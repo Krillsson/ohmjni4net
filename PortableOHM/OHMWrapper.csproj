@@ -48,7 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CpuMonitor.cs" />
-    <Compile Include="DriveInfoMonitor.cs" />
     <Compile Include="DriveMonitor.cs" />
     <Compile Include="GpuMonitor.cs" />
     <Compile Include="MainBoardMonitor.cs" />

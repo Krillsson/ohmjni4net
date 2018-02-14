@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using OpenHardwareMonitor.Hardware;
+using System.Diagnostics;
 
 namespace OHMWrapper
 {
@@ -19,6 +21,7 @@ namespace OHMWrapper
 
         public void init()
         {
+            Console.WriteLine("Initializing OpenHardwareMonitor");
             _computer = new Computer()
             {
                 CPUEnabled = true,
