@@ -1,0 +1,21 @@
+@echo off
+if not exist target mkdir target
+if not exist target\classes mkdir target\classes
+
+
+echo compile classes
+"C:\Program Files\Java\jdk1.8.0_XX\bin\javac.exe" -nowarn -d target\classes -sourcepath jvm -cp "C:\git\ohmjni4net\Proxygen\jni4net.j-0.8.8.0.jar"; "jvm\ohmwrapper\OHMMonitor.java" "jvm\ohmwrapper\CpuMonitor.java" "jvm\ohmwrapper\DriveInfoMonitor.java" "jvm\ohmwrapper\DriveInfo.java" "jvm\ohmwrapper\DriveMonitor.java" "jvm\ohmwrapper\GpuMonitor.java" "jvm\ohmwrapper\MainboardMonitor.java" "jvm\ohmwrapper\MonitorManager.java" "jvm\ohmwrapper\MonitorType.java" "jvm\ohmwrapper\ParamKey.java" "jvm\ohmwrapper\DataType.java" "jvm\ohmwrapper\Data.java" "jvm\ohmwrapper\Extensions.java" "jvm\ohmwrapper\NetworkMonitor.java" "jvm\ohmwrapper\NicInfo.java" "jvm\ohmwrapper\Bandwidth.java" "jvm\ohmwrapper\OHMManagerFactory.java" "jvm\ohmwrapper\OHMSensor.java" "jvm\ohmwrapper\OptionalOhmSensor.java" "jvm\ohmwrapper\RamMonitor.java" 
+IF %ERRORLEVEL% NEQ 0 goto end
+
+
+echo OhmJniWrapper.j4n.jar 
+"C:\Program Files\Java\jdk1.8.0_XX\bin\jar.exe" cvf OhmJniWrapper.j4n.jar  -C target\classes "ohmwrapper\OHMMonitor.class"  -C target\classes "ohmwrapper\CpuMonitor.class"  -C target\classes "ohmwrapper\DriveInfoMonitor.class"  -C target\classes "ohmwrapper\DriveInfo.class"  -C target\classes "ohmwrapper\DriveMonitor.class"  -C target\classes "ohmwrapper\GpuMonitor.class"  -C target\classes "ohmwrapper\MainboardMonitor.class"  -C target\classes "ohmwrapper\MonitorManager.class"  -C target\classes "ohmwrapper\MonitorType.class"  -C target\classes "ohmwrapper\ParamKey.class"  -C target\classes "ohmwrapper\DataType.class"  -C target\classes "ohmwrapper\Data.class"  -C target\classes "ohmwrapper\Extensions.class"  -C target\classes "ohmwrapper\NetworkMonitor.class"  -C target\classes "ohmwrapper\NicInfo.class"  -C target\classes "ohmwrapper\Bandwidth.class"  -C target\classes "ohmwrapper\OHMManagerFactory.class"  -C target\classes "ohmwrapper\OHMSensor.class"  -C target\classes "ohmwrapper\OptionalOhmSensor.class"  -C target\classes "ohmwrapper\RamMonitor.class"  > nul 
+IF %ERRORLEVEL% NEQ 0 goto end
+
+
+echo OhmJniWrapper.j4n.dll 
+"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /warn:0 /t:library /out:OhmJniWrapper.j4n.dll /recurse:clr\*.cs  /reference:"C:\git\ohmjni4net\Proxygen\OhmJniWrapper.dll" /reference:"C:\git\ohmjni4net\Proxygen\jni4net.n-0.8.8.0.dll" /reference:"C:\git\ohmjni4net\Proxygen\OpenHardwareMonitorLib.dll"
+IF %ERRORLEVEL% NEQ 0 goto end
+
+
+:end
