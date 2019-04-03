@@ -43,4 +43,4 @@ in the call to `csc.exe`.
 Once it's built you will end up with two files: `OhmJniWrapper.j4n.jar` and `OhmJniWrapper.j4n.dll`. Stick those together with
 the files listed above except `proxygen.exe` and `proxygen.exe.config` in a lib folder in your java project.
 
-Take a look at [WindowsInfoProvider](https://github.com/Krillsson/sys-API/blob/master/server/src/main/java/com/krillsson/sysapi/core/windows/WindowsInfoProvider.java) to find out how to use the lib from Java.
+Take a look at [MonitorManagerFactory](https://github.com/Krillsson/sys-API/blob/master/server/src/main/java/com/krillsson/sysapi/core/metrics/windows/MonitorManagerFactory.java) and neighbouring classes to find out how to use the lib from Java.
